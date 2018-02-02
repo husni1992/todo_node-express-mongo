@@ -166,7 +166,7 @@ describe("DELETE /todos/:id", () => {
 describe("PATCH /todos/:id", done => {
    it("should update todo", done => {
       const completed = true;
-      const text = "Build muscles";
+      const text = "Build muscles now";
 
       request(app)
          .patch(`/todos/${todos[0]._id}`)
@@ -182,7 +182,7 @@ describe("PATCH /todos/:id", done => {
 
    it("should clear completedAt when todo is not completed", done => {
       const completed = false;
-      const text = "Build muscles";
+      const text = "Build muscles now";
 
       request(app)
          .patch(`/todos/${todos[0]._id}`)
