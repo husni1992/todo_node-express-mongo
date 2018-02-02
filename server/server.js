@@ -24,7 +24,6 @@ app.get("/todos", (req, res) => {
 
 // GET /todos
 app.post("/todos", (req, res) => {
-   console.log(req.body);
    var todo = new Todo({
       text: req.body.text
    });
@@ -40,8 +39,8 @@ app.post("/todos", (req, res) => {
 });
 
 // GET /todos/2445323
-app.get("/todos/:todoId", (req, res) => {
-   const id = req.params.todoId;
+app.get("/todos/:id", (req, res) => {
+   const id = req.params.id;
 
    if (!ObjectID.isValid(id)) {
       return res.status(404).send();
@@ -55,6 +54,67 @@ app.get("/todos/:todoId", (req, res) => {
          res.send({ todo });
       })
       .catch(error => res.status(400).send({ error }));
+});
+
+// DELETE /todos/:id
+app.delete("/todos/:id", (req, res) => {
+   const id = req.params.id;
+
+   if (!ObjectID.isValid(id)) {
+      return res.status(404).send();
+   }
+
+   Todo.findByIdAndRemove(id).then(
+      todo => {
+         if (!todo) {
+            return res.status(404).send();
+         }
+         const response = {
+            message: "Todo successfully deleted",
+            id: todo._id
+         };
+         res.status(200).send(response);
+      },
+      err => {
+         const response = {
+            message: `Unable to delete todo with id ${todo._id}`
+         };
+         res.status(400).send(response);
+      }
+   );
+});
+
+// PUT /todos/:id
+app.put("/todos/:id", (req, res) => {
+   const id = req.params.id;
+   Todo.findById(id).then(
+      todo => {
+         if (!todo) {
+            return res.status(404).send();
+         }
+         todo.text = req.body.text || todo.text;
+         todo.completed = req.body.completed || todo.completed;
+         todo.completedAt = req.body.completedAt || todo.completedAt;
+         // Save the updated document back to the database
+         todo.save().then(
+            doc => {
+               res.send(doc);
+            },
+            err => {
+               const response = {
+                  message: `Unable to update todo with id ${id}`
+               };
+               res.status(400).send(response);
+            }
+         );
+      },
+      err => {
+         const response = {
+            message: `Unable to update todo with id ${id}`
+         };
+         res.status(404).send(response);
+      }
+   );
 });
 
 app.listen(port, () => {
