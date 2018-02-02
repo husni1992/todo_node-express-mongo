@@ -98,11 +98,16 @@ app.put("/todos/:id", (req, res) => {
          // Save the updated document back to the database
          todo.save().then(
             doc => {
-               res.send(doc);
+               const response = {
+                  message: "Todo successfully updated",
+                  todo
+               };
+               res.send(response);
             },
             err => {
                const response = {
-                  message: `Unable to update todo with id ${id}`
+                  message: `Unable to update todo with id ${id}`,
+                  id: todo._id
                };
                res.status(400).send(response);
             }
