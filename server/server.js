@@ -14,7 +14,7 @@ app.use(bodyParser.json());
 app.get("/todos", (req, res) => {
    Todo.find().then(
       todos => {
-         res.send({ success: true, todos, author: process.env.author });
+         res.send({ success: true, todos });
       },
       error => {
          res.status(400).send({ success: false, error });
