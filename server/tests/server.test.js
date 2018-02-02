@@ -12,7 +12,9 @@ const todos = [
    },
    {
       _id: new ObjectID(),
-      text: "Second test to do"
+      text: "Second test to do",
+      completed: true,
+      completedAt: 4545
    }
 ];
 
@@ -122,7 +124,6 @@ describe("DELETE /todos/:id", () => {
          .delete(`/todos/${todos[0]._id}`)
          .expect(200)
          .expect(res => {
-            console.log(res.body);
             expect(res.body.id).toEqual(todos[0]._id);
             expect(res.body.message).toEqual("Todo successfully deleted");
          })
@@ -137,7 +138,7 @@ describe("DELETE /todos/:id", () => {
                   done();
                })
                .catch(e => done(e));
-               
+
             // request(app)
             //    .get(`/todos/${todos[0]._id}`)
             //    .expect(404)
@@ -158,6 +159,40 @@ describe("DELETE /todos/:id", () => {
       request(app)
          .delete(`/todos/1245`)
          .expect(404)
+         .end(done);
+   });
+});
+
+describe("PATCH /todos/:id", done => {
+   it("should update todo", done => {
+      const completed = true;
+      const text = "Build muscles";
+
+      request(app)
+         .patch(`/todos/${todos[0]._id}`)
+         .send({ completed, text })
+         .expect(200)
+         .expect(res => {
+            expect(res.body.todo.text).toBe(text);
+            expect(res.body.todo.completed).toBe(completed);
+            expect(res.body.todo.completedAt).toBeA("number");
+         })
+         .end(done);
+   });
+
+   it("should clear completedAt when todo is not completed", done => {
+      const completed = false;
+      const text = "Build muscles";
+
+      request(app)
+         .patch(`/todos/${todos[0]._id}`)
+         .send({ completed, text })
+         .expect(200)
+         .expect(res => {
+            expect(res.body.todo.text).toBe(text);
+            expect(res.body.todo.completed).toBe(completed);
+            expect(res.body.todo.completedAt).toNotExist();
+         })
          .end(done);
    });
 });
