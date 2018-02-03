@@ -8,7 +8,13 @@ var data = {
 var token = jwt.sign(data, "xyz7899");
 console.log(token);
 
-var decoded = jwt.verify(token, "xyz7899");
+var decoded;
+
+try {
+   decoded = jwt.verify(token, "xyz7899x");
+} catch (err) {
+   return console.log("**********Error*************");
+}
 
 console.log("Decoded", decoded);
 
