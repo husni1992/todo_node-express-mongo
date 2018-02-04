@@ -124,11 +124,6 @@ describe("DELETE /todos/:id", () => {
                   done();
                })
                .catch(e => done(e));
-
-            // request(app)
-            //    .get(`/todos/${todos[0]._id}`)
-            //    .expect(404)
-            //    .end(done);
          });
    });
 
@@ -225,12 +220,14 @@ describe("POST /users", () => {
                return done(err);
             }
 
-            User.findOne({ email }).then(user => {
-               expect(user.email).toBe(email);
-               //    expect(user.password == password).toBe(false);
-               expect(user.password).toNotBe(password);
-               done();
-            });
+            User.findOne({ email })
+               .then(user => {
+                  expect(user.email).toBe(email);
+                  //    expect(user.password == password).toBe(false);
+                  expect(user.password).toNotBe(password);
+                  done();
+               })
+               .catch(err => done(err));
          });
    });
 
@@ -257,4 +254,33 @@ describe("POST /users", () => {
          })
          .end(done);
    });
+});
+
+describe("POST /authenticate", () => {
+   it("should login user and return auth token", done => {
+      request(app)
+         .post("/authenticate")
+         .send({
+            email: users[0].email,
+            password: users[0].password
+         })
+         .expect(200)
+         .expect(res => {
+            expect(res.headers["x-auth"]).toExist();
+         })
+         .end((err, res) => {
+            if (err) {
+               return done(err);
+            }
+
+            User.findById(users[0]._id)
+               .then(user => {
+                  expect(jwt.verify(res.headers["x-auth"], "xyzHusny")._id).toEqual(jwt.verify(users[0].tokens[0].token, "xyzHusny")._id);
+                  done();
+               })
+               .catch(err => done(err));
+         });
+   });
+
+   //    it("should reject invalid login", done => {});
 });
