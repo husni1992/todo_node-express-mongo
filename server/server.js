@@ -10,7 +10,6 @@ var { Todo } = require("./models/todo");
 var { User } = require("./models/user");
 
 var { authenticate } = require("./middleware/authenticate");
-var { authenticateUser } = require("./services/userAuthenticate");
 
 var app = express();
 const port = process.env.PORT;
