@@ -10,6 +10,7 @@ var { Todo } = require("./models/todo");
 var { User } = require("./models/user");
 
 var { authenticate } = require("./middleware/authenticate");
+// var { authenticateUser } = require("./services/userAuthenticate");
 
 var app = express();
 const port = process.env.PORT;
@@ -182,6 +183,21 @@ app.post("/users", (req, res) => {
          res.status(400).send(err);
       });
 });
+
+// POST /authenticate
+// app.post("/authenticate", (req, res) => {
+//    var body = _.pick(req.body, ["email", "password"]);
+//    User.findOne({
+//       email: body.email
+//    })
+//       .then(user => {
+//          authenticateUser(body.password, user.password, function(error, authenticated) {
+//             if (authenticated) return res.status(200).send({ loggedin: "success" });
+//             return res.status(401).send("Access denied");
+//          });
+//       })
+//       .catch(err => res.status(401).send());
+// });
 
 app.get("/users/me", authenticate, (req, res) => {
    res.send(req.user);
