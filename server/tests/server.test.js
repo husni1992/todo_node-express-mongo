@@ -337,7 +337,7 @@ describe("POST /authenticate", () => {
 
             User.findById(users[0]._id)
                .then(user => {
-                  expect(jwt.verify(res.headers["x-auth"], "xyzHusny")._id).toEqual(jwt.verify(users[0].tokens[0].token, "xyzHusny")._id);
+                  expect(jwt.verify(res.headers["x-auth"], process.env.JWT_SECRET)._id).toEqual(jwt.verify(users[0].tokens[0].token, process.env.JWT_SECRET)._id);
                   done();
                })
                .catch(err => done(err));

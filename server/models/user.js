@@ -48,7 +48,7 @@ UserSchema.methods.generateAuthToken = function() {
             _id: user._id.toHexString(),
             access
          },
-         "xyzHusny"
+         process.env.JWT_SECRET
       )
       .toString();
 
@@ -85,7 +85,7 @@ UserSchema.statics.findByToken = function(token) {
    var decode;
 
    try {
-      decode = jwt.verify(token, "xyzHusny");
+      decode = jwt.verify(token, process.env.JWT_SECRET);
    } catch (err) {
       return Promise.reject("Unverified access code");
    }
