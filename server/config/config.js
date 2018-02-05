@@ -1,7 +1,7 @@
 var env = process.env.NODE_ENV || "development";
 console.log("env******", env);
 
-if (env === "development" || evn === "test") {
+if (env === "development" || env === "test") {
    var envConfig = require("./config.json")[env];
 
    Object.keys(envConfig).forEach(key => {
