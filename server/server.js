@@ -16,8 +16,10 @@ const port = process.env.PORT;
 
 app.use(bodyParser.json());
 
-app.get("/todos", (req, res) => {
-   Todo.find().then(
+app.get("/todos", authenticate, (req, res) => {
+   Todo.find({
+      _creator: req.user._id
+   }).then(
       todos => {
          res.send({ success: true, todos });
       },
@@ -27,10 +29,10 @@ app.get("/todos", (req, res) => {
    );
 });
 
-// POST /todos
-app.post("/todos", (req, res) => {
+app.post("/todos", authenticate, (req, res) => {
    var todo = new Todo({
-      text: req.body.text
+      text: req.body.text,
+      _creator: req.user._id
    });
 
    todo.save().then(
@@ -43,15 +45,17 @@ app.post("/todos", (req, res) => {
    );
 });
 
-// GET /todos/2445323
-app.get("/todos/:id", (req, res) => {
+app.get("/todos/:id", authenticate, (req, res) => {
    const id = req.params.id;
 
    if (!ObjectID.isValid(id)) {
       return res.status(404).send();
    }
 
-   Todo.findById(id)
+   Todo.findOne({
+      _id: id,
+      _creator: req.user._id
+   })
       .then(todo => {
          if (!todo) {
             return res.status(404).send();
@@ -61,15 +65,17 @@ app.get("/todos/:id", (req, res) => {
       .catch(error => res.status(400).send({ error }));
 });
 
-// DELETE /todos/:id
-app.delete("/todos/:id", (req, res) => {
+app.delete("/todos/:id", authenticate, (req, res) => {
    const id = req.params.id;
 
    if (!ObjectID.isValid(id)) {
       return res.status(404).send();
    }
 
-   Todo.findByIdAndRemove(id).then(
+   Todo.findOneAndRemove({
+      _id: id,
+      _creator: req.user._id
+   }).then(
       todo => {
          if (!todo) {
             return res.status(404).send();
@@ -89,46 +95,7 @@ app.delete("/todos/:id", (req, res) => {
    );
 });
 
-// PUT /todos/:id
-app.put("/todos/:id", (req, res) => {
-   const id = req.params.id;
-   Todo.findById(id).then(
-      todo => {
-         if (!todo) {
-            return res.status(404).send();
-         }
-         todo.text = req.body.text || todo.text;
-         todo.completed = req.body.completed || todo.completed;
-         todo.completedAt = req.body.completedAt || todo.completedAt;
-         // Save the updated document back to the database
-         todo.save().then(
-            doc => {
-               const response = {
-                  message: "Todo successfully updated",
-                  todo
-               };
-               res.send(response);
-            },
-            err => {
-               const response = {
-                  message: `Unable to update todo with id ${id}`,
-                  id: todo._id
-               };
-               res.status(400).send(response);
-            }
-         );
-      },
-      err => {
-         const response = {
-            message: `Unable to update todo with id ${id}`
-         };
-         res.status(404).send(response);
-      }
-   );
-});
-
-// PATCH /todos/:id
-app.patch("/todos/:id", (req, res) => {
+app.patch("/todos/:id", authenticate, (req, res) => {
    const id = req.params.id;
    var body = _.pick(req.body, ["text", "completed"]);
 
@@ -136,15 +103,20 @@ app.patch("/todos/:id", (req, res) => {
       return res.status(404).send();
    }
 
-   if (_.isBoolean(body.completed) && body.completed) {
+   if (!_.isBoolean(body.completed)) {
+      res.status(400).send();
+   } else if (_.isBoolean(body.completed) && body.completed) {
       body.completedAt = new Date().getTime();
    } else {
       body.completed = false;
       body.completedAt = null;
    }
 
-   Todo.findByIdAndUpdate(
-      id,
+   Todo.findOneAndUpdate(
+      {
+         _id: id,
+         _creator: req.user._id
+      },
       {
          $set: body
       },
@@ -162,7 +134,47 @@ app.patch("/todos/:id", (req, res) => {
       .catch(e => res.status(400).send());
 });
 
-// POST /users/
+// below is an alternate way to update todo with PUT
+// app.put("/todos/:id", authenticate, (req, res) => {
+//    const id = req.params.id;
+//    Todo.findOne({
+//       _id: id,
+//       _creator: req.user._id
+//    }).then(
+//       todo => {
+//          if (!todo) {
+//             return res.status(404).send();
+//          }
+//          todo.text = req.body.text || todo.text;
+//          todo.completed = req.body.completed || todo.completed;
+//          todo.completedAt = req.body.completedAt || todo.completedAt;
+//          // Save the updated document back to the database
+//          todo.save().then(
+//             doc => {
+//                const response = {
+//                   message: "Todo successfully updated",
+//                   todo
+//                };
+//                res.send(response);
+//             },
+//             err => {
+//                const response = {
+//                   message: `Unable to update todo with id ${id}`,
+//                   id: todo._id
+//                };
+//                res.status(400).send(response);
+//             }
+//          );
+//       },
+//       err => {
+//          const response = {
+//             message: `Unable to update todo with id ${id}`
+//          };
+//          res.status(404).send(response);
+//       }
+//    );
+// });
+
 app.post("/users", (req, res) => {
    var body = _.pick(req.body, ["email", "password"]);
    var user = new User(body);
@@ -183,7 +195,6 @@ app.post("/users", (req, res) => {
       });
 });
 
-// POST / authenticate;
 app.post("/authenticate", (req, res) => {
    var body = _.pick(req.body, ["email", "password"]);
 

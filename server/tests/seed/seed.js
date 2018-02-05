@@ -22,18 +22,28 @@ const users = [
    {
       _id: userTwoId,
       email: "mghahamed@hmail.om",
-      password: "userTwoPassword"
+      password: "userTwoPassword",
+      tokens: [
+         {
+            access: "auth",
+            token: jwt.sign({ _id: userTwoId, access: "auth" }, "xyzHusny").toString()
+         }
+      ]
    }
 ];
 
 const todos = [
    {
       _id: new ObjectID(),
-      text: "First task to do"
+      text: "First task to do",
+      _creator: userOneId
    },
    {
       _id: new ObjectID(),
-      text: "Second test to do"
+      text: "Second test to do",
+      completed: true,
+      completedAt: 3358,
+      _creator: userTwoId
    }
 ];
 
