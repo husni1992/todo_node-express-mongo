@@ -39,6 +39,7 @@ UserSchema.methods.toJSON = function() {
    return _.pick(this, ["_id", "email"]);
 };
 
+// use https://jwt.io to test the jwt hash with the salt JWT_SECRET value
 UserSchema.methods.generateAuthToken = function() {
    var user = this;
    var access = "auth";
