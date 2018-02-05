@@ -105,7 +105,7 @@ app.patch("/todos/:id", authenticate, (req, res) => {
 
    if (_.isBoolean(body.completed) && body.completed) {
       body.completedAt = new Date().getTime();
-   } else {
+   } else if (_.isBoolean(body.completed) && !body.completed) {
       body.completed = false;
       body.completedAt = null;
    }
